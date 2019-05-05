@@ -1,11 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
-public class Board : MonoBehaviour
+public class Board
 {
     private int _numOfRows = 20;
     private int _numOfColumns = 10;
     private Brick[,] _fixedBricks;
+    private List<int> _fullRows = new List<int>();
+    private bool _fullRowsActive = true;
 
     public Board(int numOfRows, int numOfColumns)
     {
@@ -63,9 +66,8 @@ public class Board : MonoBehaviour
     {
         bool result = true;
         var bricks = domino._bricks;
-        for (int i = 0; i < bricks.Length; i++)
+        foreach (var b in bricks)
         {
-            var b = bricks[i];
             result = result && CanMoveRight(b);
         }
         return result;
@@ -80,9 +82,8 @@ public class Board : MonoBehaviour
     {
         bool result = true;
         var bricks = domino._bricks;
-        for (int i = 0; i < bricks.Length; i++)
+        foreach (var b in bricks)
         {
-            var b = bricks[i];
             result = result && CanMoveLeft(b);
         }
         return result;
@@ -97,9 +98,8 @@ public class Board : MonoBehaviour
     {
         bool result = true;
         var bricks = domino._bricks;
-        for (int i = 0; i < bricks.Length; i++)
+        foreach (var b in bricks)
         {
-            var b = bricks[i];
             result = result && CanMoveDown(b);
         }
         return result;
@@ -123,7 +123,7 @@ public class Board : MonoBehaviour
         {
             _fixedBricks[b.x, b.y] = b;
         }
-        Destroy(domino.gameObject);
+        MonoBehaviour.Destroy(domino.gameObject);
     }
 
     public void Clear()
@@ -132,7 +132,48 @@ public class Board : MonoBehaviour
         {
             if (b != null)
             {
-                Destroy(b.gameObject);
+                MonoBehaviour.Destroy(b.gameObject);
+            }
+        }
+    }
+
+    public void UpdateFullRows()
+    {
+        for (int row = _numOfRows - 1; row >= 0; row--)
+        {
+            bool full = RowFull(row);
+            if (full)
+            {
+                _fullRows.Add(row);
+            }
+        }
+    }
+
+    public void EliminateFullRows()
+    {
+        foreach (int row in _fullRows)
+        {
+            RemoveRow(row);
+            MoveDownBoardByRow(row);
+        }
+        _fullRows.Clear();
+    }
+
+    public int NumOfFullRows()
+    {
+        return _fullRows.Count;
+    }
+
+    public void BlinkFullRows()
+    {
+        _fullRowsActive = !_fullRowsActive;
+        foreach (int row in _fullRows)
+        {
+            for (int column = 0; column < _numOfColumns; column++)
+            {
+                var b = _fixedBricks[column, row];
+                var o = b.gameObject;
+                o.SetActive(_fullRowsActive);
             }
         }
     }
@@ -157,7 +198,7 @@ public class Board : MonoBehaviour
             if (b != null)
             {
                 var o = b.gameObject;
-                Destroy(o);
+                MonoBehaviour.Destroy(o);
             }
         }
     }
@@ -183,5 +224,10 @@ public class Board : MonoBehaviour
         {
             _fixedBricks[c, _numOfColumns - 1] = null;
         }
+    }
+
+    private void log(object message)
+    {
+        Debug.Log(message);
     }
 }

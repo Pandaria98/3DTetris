@@ -9,18 +9,23 @@ public class GameController : MonoBehaviour
     public int numOfColumns = 10;
     public int scorePerRow = 10;
 
-    public int level = 5;
-    public float baseSecondsPerMove = 1.0f;
+    public int level = 0;
+    public float baseSecondsPerMove = 0.5f;
+    public float downSecondsPerMove = 0.07f;
     private float _secondsPerMove;
     private float _timer;
+
+    public float blinkDuration = 0.3f;
+    public float blinkInterval = 0.08f;
+    private bool _blinking = false;
+    private float _blinkTimer;
+    private float _blinkIntervalTimer;
 
     private Brick[,] _fixedBricks;
     private Board _board;
 
     public GameObject dominoPrefab;
     private Domino _domino;
-    private delegate void SetShape(Domino domino);
-    private SetShape[] DominoShapes;
 
     public GameObject mainGUI;
     private MainGUI _mainGUI;
@@ -33,11 +38,8 @@ public class GameController : MonoBehaviour
     {
         _mainGUI = mainGUI.GetComponent<MainGUI>();
         _board = new Board(numOfRows, numOfColumns);
-
-        InitShapes();
-        InitDomino();
-        SetLevel(level);
         _timer = _secondsPerMove;
+        InitDomino();
 	}
 
     private void Update()
@@ -46,9 +48,46 @@ public class GameController : MonoBehaviour
         {
             return;
         }
-        UpdateInput();
-        UpdateMoveDown();
-        CheckFull();
+        if (_blinking)
+        {
+            UpdateBlink();
+        }
+        else
+        {
+            UpdateInput();
+            UpdateMoveDown();
+            CheckFull();
+        }
+    }
+
+    private void StartBlink()
+    {
+        _blinking = true;
+        _blinkTimer = blinkDuration;
+        _blinkIntervalTimer = blinkInterval;
+    }
+
+    private void UpdateBlink()
+    {
+        _blinkTimer -= Time.deltaTime;
+        _blinkIntervalTimer -= Time.deltaTime;
+        if (_blinkTimer <= 0)
+        {
+            StopBlink();
+        }
+        if (_blinkIntervalTimer <= 0)
+        {
+            _blinkIntervalTimer = blinkInterval;
+            _board.BlinkFullRows();
+        }
+    }
+
+    private void StopBlink()
+    {
+        _blinking = false;
+        int n = _board.NumOfFullRows();
+        Score(n);
+        _board.EliminateFullRows();
     }
 
     private void UpdateInput()
@@ -63,9 +102,13 @@ public class GameController : MonoBehaviour
             d.MoveLeft();
         }
 
-        if (Input.GetKey("down"))
+        if (Input.GetKeyDown("down"))
         {
-            _timer -= 3 * Time.deltaTime;
+            _timer = 0;
+            _secondsPerMove = downSecondsPerMove;
+        } else if (Input.GetKeyUp("down"))
+        {
+            SetLevel(level);
         }
 
         if (Input.GetKeyDown("up") && _board.CanRotate(d))
@@ -92,24 +135,33 @@ public class GameController : MonoBehaviour
         _paused = false;
     }
 
-    private void UpdateMoveDown()
+    private bool Tick()
     {
+        // 计时完成时，返回真
         _timer -= Time.deltaTime;
-        var d = _domino;
         if (_timer <= 0)
         {
             _timer = _secondsPerMove;
+            return true;
+        }
+        return false;
+    }
+
+    private void UpdateMoveDown()
+    {
+        var d = _domino;
+        bool shouldMoveDown = Tick();
+        if (shouldMoveDown)
+        {
             if (_board.CanMoveDown(d))
             {
                 d.MoveDown();
-            }
-            else
+            } else
             {
                 // Game Over 只会发生在 Domino 想要被固定的时候
                 if (IsDead())
                 {
-                    PauseGame();
-                    _mainGUI.ShowDeadGUI();
+                    GameOver();
                     return;
                 }
                 _board.SetDominoFixed(d);
@@ -128,23 +180,19 @@ public class GameController : MonoBehaviour
 
     private void CheckFull()
     {
-        for (int row = 0; row < numOfRows; row++)
+        _board.UpdateFullRows();
+        int numOfFullRows = _board.NumOfFullRows();
+        if (numOfFullRows > 0)
         {
-            bool full = _board.RowFull(row);
-            if (full)
-            {
-                _board.RemoveRow(row);
-                _board.MoveDownBoardByRow(row);
-                Score();
-                CheckFull();
-                return;
-            }
+            StartBlink();
         }
+        
+
     }
 
-    private void Score()
+    private void Score(int rows = 1)
     {
-        _score += scorePerRow;
+        _score += scorePerRow * rows;
         _mainGUI.SetScore(_score);
     }
 
@@ -173,34 +221,17 @@ public class GameController : MonoBehaviour
         ResumeGame();
     }
 
-    private void InitShapes()
+    private void GameOver()
     {
-        DominoShapes = new SetShape[7];
-        DominoShapes[0] = Domino.SetS;
-        DominoShapes[1] = Domino.SetZ;
-        DominoShapes[2] = Domino.SetO;
-        DominoShapes[3] = Domino.SetL;
-        DominoShapes[4] = Domino.SetJ;
-        DominoShapes[5] = Domino.SetT;
-        DominoShapes[6] = Domino.SetI;
+        PauseGame();
+        _mainGUI.ShowDeadGUI();
     }
 
     private void InitDomino()
     {
         int x = Mathf.FloorToInt(numOfColumns / 2);
         int y = numOfRows;
-
-        Vector3 p = new Vector3(x, y, 0);
-        Quaternion r = Quaternion.identity;
-        GameObject d = Instantiate(dominoPrefab, p, r);
-
-        _domino = d.GetComponent<Domino>();
-        _domino.x = x;
-        _domino.y = y;
-
-        // TODO: 修改随机形状实现
-        int i = Random.Range(0, DominoShapes.Length);
-        DominoShapes[i](_domino);
+        _domino = Domino.GetRandomDomino(x, y);
     }
 
     private void log(object message)

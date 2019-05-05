@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEditor;
 
 public class Domino : MonoBehaviour
 {
@@ -15,7 +16,50 @@ public class Domino : MonoBehaviour
     private int _numOfShapes = 2;
     private int[,,] _shapes;
 
-    public static void SetS(Domino domino)
+    delegate void SetShape(Domino domino);
+
+    public static Domino GetRandomDomino(int x, int y)
+    {
+        Vector3 p = new Vector3(x, y, 0);
+        Quaternion r = Quaternion.identity;
+        string path = "Assets/Prefabs/Domino.prefab";
+        GameObject dominoPrefab = (GameObject)AssetDatabase.LoadAssetAtPath(path, typeof(GameObject));
+        GameObject d = Instantiate(dominoPrefab, p, r);
+
+        Domino domino = d.GetComponent<Domino>();
+        domino.x = x;
+        domino.y = y;
+        SetRandomShape(domino);
+
+        //// 用 x y 值设置 Object 的实际位置
+        //domino.transform.position = new Vector3(x, y, 0);
+        //domino.UpdateBricksPosition();
+
+        return domino;
+    }
+
+    public static void SetRandomShape(Domino domino)
+    {
+        var dominoShapes = GetShapes();
+        int i = Random.Range(0, dominoShapes.Length);
+        dominoShapes[i](domino);
+    }
+
+    private static SetShape[] GetShapes()
+    {
+        SetShape[] dominoShapes;
+        dominoShapes = new SetShape[7];
+        dominoShapes[0] = SetS;
+        dominoShapes[1] = SetZ;
+        dominoShapes[2] = SetO;
+        dominoShapes[3] = SetL;
+        dominoShapes[4] = SetJ;
+        dominoShapes[5] = SetT;
+        dominoShapes[6] = SetI;
+        return dominoShapes;
+    }
+
+    private static void SetS(Domino domino)
     {
         domino.InitBricksByColorIndex(0);
         domino._width = 3;
@@ -36,7 +80,7 @@ public class Domino : MonoBehaviour
         };
     }
 
-    public static void SetZ(Domino domino)
+    private static void SetZ(Domino domino)
     {
         domino.InitBricksByColorIndex(1);
         domino._width = 3;
@@ -57,7 +101,7 @@ public class Domino : MonoBehaviour
         };
     }
 
-    public static void SetO(Domino domino)
+    private static void SetO(Domino domino)
     {
         domino.InitBricksByColorIndex(2);
         domino._width = 2;
@@ -72,7 +116,7 @@ public class Domino : MonoBehaviour
         };
     }
 
-    public static void SetT(Domino domino)
+    private static void SetT(Domino domino)
     {
         domino.InitBricksByColorIndex(3);
         domino._width = 3;
@@ -103,7 +147,7 @@ public class Domino : MonoBehaviour
         };
     }
 
-    public static void SetL(Domino domino)
+    private static void SetL(Domino domino)
     {
         domino.InitBricksByColorIndex(4);
         domino._width = 3;
@@ -134,7 +178,7 @@ public class Domino : MonoBehaviour
         };
     }
 
-    public static void SetJ(Domino domino)
+    private static void SetJ(Domino domino)
     {
         domino.InitBricksByColorIndex(5);
         domino._width = 3;
@@ -165,7 +209,7 @@ public class Domino : MonoBehaviour
         };
     }
 
-    public static void SetI(Domino domino)
+    private static void SetI(Domino domino)
     {
         domino.InitBricksByColorIndex(6);
         domino._width = 4;
@@ -188,7 +232,7 @@ public class Domino : MonoBehaviour
         };
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         // 用 x y 值设置 Object 的实际位置
         transform.position = new Vector3(x, y, 0);
@@ -270,7 +314,7 @@ public class Domino : MonoBehaviour
     public void MoveDown()
     {
         y -= 1;
-        Update();
+        FixedUpdate();
     }
 
     public void MoveLeft()
