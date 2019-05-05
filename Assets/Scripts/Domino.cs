@@ -7,7 +7,7 @@ public class Domino : MonoBehaviour
     public int x;
     public int y;
     public Brick[] _bricks = new Brick[4];
-    public Material materials;
+    public Material[] materials = new Material[7];
 
     private int _width = 3;
     private int _height = 3;
@@ -17,6 +17,7 @@ public class Domino : MonoBehaviour
 
     public static void SetS(Domino domino)
     {
+        domino.InitBricksByColorIndex(0);
         domino._width = 3;
         domino._height = 3;
         domino._shapeIndex = 0;
@@ -37,6 +38,7 @@ public class Domino : MonoBehaviour
 
     public static void SetZ(Domino domino)
     {
+        domino.InitBricksByColorIndex(1);
         domino._width = 3;
         domino._height = 3;
         domino._shapeIndex = 0;
@@ -57,6 +59,7 @@ public class Domino : MonoBehaviour
 
     public static void SetO(Domino domino)
     {
+        domino.InitBricksByColorIndex(2);
         domino._width = 2;
         domino._height = 2;
         domino._shapeIndex = 0;
@@ -71,6 +74,7 @@ public class Domino : MonoBehaviour
 
     public static void SetT(Domino domino)
     {
+        domino.InitBricksByColorIndex(3);
         domino._width = 3;
         domino._height = 3;
         domino._shapeIndex = 0;
@@ -101,6 +105,7 @@ public class Domino : MonoBehaviour
 
     public static void SetL(Domino domino)
     {
+        domino.InitBricksByColorIndex(4);
         domino._width = 3;
         domino._height = 3;
         domino._shapeIndex = 0;
@@ -131,6 +136,7 @@ public class Domino : MonoBehaviour
 
     public static void SetJ(Domino domino)
     {
+        domino.InitBricksByColorIndex(5);
         domino._width = 3;
         domino._height = 3;
         domino._shapeIndex = 0;
@@ -161,6 +167,7 @@ public class Domino : MonoBehaviour
 
     public static void SetI(Domino domino)
     {
+        domino.InitBricksByColorIndex(6);
         domino._width = 4;
         domino._height = 4;
         domino._shapeIndex = 0;
@@ -181,12 +188,6 @@ public class Domino : MonoBehaviour
         };
     }
 
-    private void Start()
-    {
-        InitBricks();
-        UpdateBricksPosition();
-    }
-
     private void Update()
     {
         // 用 x y 值设置 Object 的实际位置
@@ -203,8 +204,22 @@ public class Domino : MonoBehaviour
             GameObject o = Instantiate(brickPrefab, p, r);
             Brick b = o.GetComponent<Brick>();
             _bricks[i] = b;
-            var renderer = b.GetComponent<Renderer>();
-            renderer.material = new Material(Shader.Find(""))
+            var renderer = b.GetComponentInChildren<Renderer>();
+            renderer.material = materials[0];
+        }
+    }
+
+    private void InitBricksByColorIndex(int colorIndex)
+    {
+        Vector3 p = new Vector3(100, 100, 0);
+        Quaternion r = Quaternion.identity;
+        for (int i = 0; i < _bricks.Length; i++)
+        {
+            GameObject o = Instantiate(brickPrefab, p, r);
+            Brick b = o.GetComponent<Brick>();
+            _bricks[i] = b;
+            var renderer = b.GetComponentInChildren<Renderer>();
+            renderer.material = materials[colorIndex];
         }
     }
 
@@ -228,6 +243,12 @@ public class Domino : MonoBehaviour
         return positions;
     }
 
+    public Vector2[] CurrentPositoins()
+    {
+        int index = _shapeIndex;
+        return _PositionsByShapeIndex(index);
+    }
+
     public Vector2[] RotatedPositions()
     {
         int index = _NextShapeIndex();
@@ -249,6 +270,7 @@ public class Domino : MonoBehaviour
     public void MoveDown()
     {
         y -= 1;
+        Update();
     }
 
     public void MoveLeft()
@@ -279,5 +301,14 @@ public class Domino : MonoBehaviour
     private void log(object message)
     {
         Debug.Log(message);
+    }
+
+    public void Clear()
+    {
+        foreach (var b in _bricks)
+        {
+            Destroy(b.gameObject);
+        }
+        Destroy(gameObject);
     }
 }

@@ -19,7 +19,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4362381119746138}
-  - component: {fileID: 114277424561665794}
+  - component: {fileID: 114325820145554650}
   m_Layer: 0
   m_Name: Domino
   m_TagString: Untagged
@@ -40,7 +40,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &114277424561665794
+--- !u!114 &114325820145554650
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -51,12 +51,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c4e8bc005450714c89447de0fab657b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  brickPrefabs:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   brickPrefab: {fileID: 1547757904470720, guid: 3457d455051c139409408c5a1c81e664,
     type: 2}
-  x: 9
-  y: 9
+  x: 0
+  y: 0
   _bricks:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  materials:
+  - {fileID: 2100000, guid: 2e4175510fef647ef90a69e25dcd3427, type: 2}
+  - {fileID: 2100000, guid: dfd0162ca303b4b7c9867380d6d98939, type: 2}
+  - {fileID: 2100000, guid: b73ee4be1a4d54849bda808323021c0c, type: 2}
+  - {fileID: 2100000, guid: bc89bd8ba308c4a54ab39847c9a48cd3, type: 2}
+  - {fileID: 2100000, guid: a6d30d537a9bb594693a599869675dcb, type: 2}
+  - {fileID: 2100000, guid: 29c8911a7de6b4123a8c71ca6876f1bc, type: 2}
+  - {fileID: 2100000, guid: 9314a2627d05440dba46038db24384e0, type: 2}
