@@ -232,7 +232,7 @@ public class Domino : MonoBehaviour
         };
     }
 
-    private void FixedUpdate()
+    public void UpdatePosition()
     {
         // 用 x y 值设置 Object 的实际位置
         transform.position = new Vector3(x, y, 0);
@@ -314,7 +314,7 @@ public class Domino : MonoBehaviour
     public void MoveDown()
     {
         y -= 1;
-        FixedUpdate();
+        UpdatePosition();
     }
 
     public void MoveLeft()

@@ -38,11 +38,14 @@ public class Board
         {
             result = false;
         }
-        else if (y < 0 || y >= _numOfRows)
+        else if (y < 0)
         {
             result = false;
         }
-        else
+        else if (y >= _numOfRows)
+        {
+            result = true;
+        } else
         {
             var slot = _fixedBricks[x, y];
             result = slot == null;

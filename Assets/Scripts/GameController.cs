@@ -38,6 +38,7 @@ public class GameController : MonoBehaviour
     {
         _mainGUI = mainGUI.GetComponent<MainGUI>();
         _board = new Board(numOfRows, numOfColumns);
+        SetLevel(0);
         _timer = _secondsPerMove;
         InitDomino();
 	}
@@ -54,6 +55,7 @@ public class GameController : MonoBehaviour
         }
         else
         {
+            _domino.UpdatePosition();
             UpdateInput();
             UpdateMoveDown();
             CheckFull();
@@ -109,6 +111,7 @@ public class GameController : MonoBehaviour
         } else if (Input.GetKeyUp("down"))
         {
             SetLevel(level);
+            _timer = _secondsPerMove;
         }
 
         if (Input.GetKeyDown("up") && _board.CanRotate(d))
@@ -122,6 +125,7 @@ public class GameController : MonoBehaviour
             {
                 d.MoveDown();
             }
+            _timer = 0;
         }
     }
 
